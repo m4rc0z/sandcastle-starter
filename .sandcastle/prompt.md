@@ -2,13 +2,13 @@
 
 ## Open issues
 
-!`gh issue list --state open --label Sandcastle --limit 100 --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'`
+!`find issues -name "*.md" | sort | xargs grep -l "^status: open" 2>/dev/null | xargs -I{} sh -c 'echo "=== {} ==="; cat {}; echo'`
 
-The list above has already been filtered to issues ready for work and is the sole source of truth for what work exists. Do not run your own unfiltered query to find more issues — if the list is empty, there is nothing to do.
+The list above has already been filtered to issues with `status: open` and is the sole source of truth for what work exists. If the list is empty, there is nothing to do.
 
-## Recent RALPH commits (last 10)
+## Recent commits (last 10)
 
-!`git log --oneline --grep="RALPH" -10`
+!`git log --oneline -10`
 
 # Task
 
@@ -27,27 +27,26 @@ Pick the highest-priority open issue that is not blocked by another open issue.
 
 ## Workflow
 
-1. **Explore** — read the issue carefully. Pull in the parent PRD if referenced. Read the relevant source files and tests before writing any code.
+1. **Explore** — read the issue carefully. Read the relevant source files and tests before writing any code.
 2. **Plan** — decide what to change and why. Keep the change as small as possible.
-3. **Execute** — use RGR (Red → Green → Repeat → Refactor): write a failing test first, then write the implementation to pass it.
+3. **Execute** — write a failing test first, then make it pass.
 4. **Verify** — run `npm run typecheck` and `npm run test` before committing. Fix any failures before proceeding.
 5. **Commit** — make a single git commit. The message MUST:
    - Start with `RALPH:` prefix
-   - Include the task completed and any PRD reference
-   - List key decisions made
+   - Include the issue filename and what was done
    - List files changed
    - Note any blockers for the next iteration
-6. **Close** — close the issue with `gh issue close <ID> --comment "Completed by Sandcastle"` explaining what was done.
+6. **Close** — mark the issue as done by editing its frontmatter: change `status: open` to `status: closed`. Commit that change separately with message `RALPH: close <filename>`.
 
 ## Rules
 
 - Work on **one issue per iteration**. Do not attempt multiple issues in a single iteration.
 - Do not close an issue until you have committed the fix and verified tests pass.
 - Do not leave commented-out code or TODO comments in committed code.
-- If you are blocked (missing context, failing tests you cannot fix, external dependency), leave a comment on the issue and move on — do not close it.
+- If blocked (missing context, failing tests you cannot fix, external dependency), change `status: open` to `status: blocked` and add a `blocked_reason:` field to the frontmatter. Do not close it.
 
 # Done
 
-When all actionable issues are complete (or you are blocked on all remaining ones), or the open-issues block at the top of this prompt is empty, output the completion signal:
+When all actionable issues are complete (or you are blocked on all remaining ones), output:
 
 <promise>COMPLETE</promise>
